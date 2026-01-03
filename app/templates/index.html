@@ -13,13 +13,10 @@
         <div class="card mb-3">
             <div class="card-body">
                 <form class="row g-2" ng-submit="vm.addTodo()">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" placeholder="Add New" ng-model="vm.newTitle" required>
+                    <div class="col-md-9 col-lg-10">
+                        <input type="text" class="form-control" placeholder="Add new" ng-model="vm.newTitle" required>
                     </div>
-                    <div class="col-md-3">
-                        <input type="date" class="form-control" ng-model="vm.newDueDate">
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-lg-2">
                         <button type="submit" class="btn btn-primary w-100">Add</button>
                     </div>
                 </form>
@@ -28,31 +25,39 @@
 
         <div class="card">
             <div class="card-body">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Status</th>
-                            <th>Due Date</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="todo in vm.todos">
-                            <td>{{ todo.title }}</td>
-                            <td>
-                                <select class="form-select form-select-sm" ng-model="todo.status" ng-change="vm.updateTodo(todo)">
-                                    <option value="pending">Pending</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                            </td>
-                            <td>{{ todo.due_date | date:'yyyy-MM-dd' }}</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger" ng-click="vm.removeTodo(todo)">Remove</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th class="text-center">Done</th>
+                                <th class="text-end">Edit/Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="todo in vm.todos" class="todo-row">
+                                <td>
+                                    <span ng-if="!todo.isEditing">{{ todo.title }}</span>
+                                    <input ng-if="todo.isEditing" type="text" class="form-control form-control-sm" ng-model="todo.editTitle">
+                                </td>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input" ng-model="todo.isDone" ng-change="vm.toggleDone(todo)">
+                                </td>
+                                <td class="text-end">
+                                    <div ng-if="todo.isEditing" class="btn-group btn-group-sm me-2" role="group">
+                                        <button type="button" class="btn btn-primary" ng-click="vm.saveEdit(todo)">Save</button>
+                                        <button type="button" class="btn btn-outline-secondary" ng-click="vm.cancelEdit(todo)">Cancel</button>
+                                    </div>
+                                    <button ng-if="!todo.isEditing" type="button" class="btn btn-sm btn-outline-secondary me-2" ng-click="vm.startEdit(todo)">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" ng-click="vm.removeTodo(todo)">Remove</button>
+                                </td>
+                            </tr>
+                            <tr ng-if="!vm.todos.length">
+                                <td colspan="3" class="text-center text-muted">No todo items yet. Add one above!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

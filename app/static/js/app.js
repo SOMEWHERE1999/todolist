@@ -22,32 +22,58 @@
     const vm = this;
     vm.todos = [];
     vm.newTitle = '';
-    vm.newDueDate = '';
 
     vm.loadTodos = function () {
       TodoService.list().then((response) => {
-        vm.todos = response.data.data || [];
+        vm.todos = (response.data.data || []).map((item) => ({
+          ...item,
+          isDone: item.status === 'completed',
+          isEditing: false,
+          editTitle: item.title,
+        }));
       });
     };
 
     vm.addTodo = function () {
       if (!vm.newTitle) return;
-      const payload = { title: vm.newTitle, status: 'pending' };
-      if (vm.newDueDate) {
-        payload.due_date = vm.newDueDate;
-      }
+      const payload = { title: vm.newTitle.trim(), status: 'pending' };
+      if (!payload.title) return;
+
       TodoService.create(payload).then(() => {
         vm.newTitle = '';
-        vm.newDueDate = '';
         vm.loadTodos();
       });
     };
 
-    vm.updateTodo = function (todo) {
-      TodoService.update(todo.id, {
-        title: todo.title,
-        status: todo.status,
-        due_date: todo.due_date,
+    vm.toggleDone = function (todo) {
+      const status = todo.isDone ? 'completed' : 'pending';
+      todo.status = status;
+      TodoService.update(todo.id, { status }).then(() => {
+        todo.isDone = status === 'completed';
+      });
+    };
+
+    vm.startEdit = function (todo) {
+      todo.isEditing = true;
+      todo.editTitle = todo.title;
+    };
+
+    vm.cancelEdit = function (todo) {
+      todo.isEditing = false;
+      todo.editTitle = todo.title;
+    };
+
+    vm.saveEdit = function (todo) {
+      const updatedTitle = (todo.editTitle || '').trim();
+      if (!updatedTitle) {
+        todo.editTitle = todo.title;
+        todo.isEditing = false;
+        return;
+      }
+
+      TodoService.update(todo.id, { title: updatedTitle }).then(() => {
+        todo.title = updatedTitle;
+        todo.isEditing = false;
       });
     };
 
